@@ -1,42 +1,53 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.font_manager import FontProperties
+import numpy as np
+import statsmodels.api as sm
 
-# 读取清洗后的协议数据
-df = pd.read_excel("../../output/excel/协议数据汇总_每平台每年变化率.xlsx")
-
-# 过滤掉“变化率”为 0 的数据
-filtered_df = df[df["变化率"] > 0]
-
-# 按“年份”和“平台性质”分组，计算“变化率”的中位数
-grouped = filtered_df.groupby(["年份", "平台性质"])["变化率"].median().reset_index()
-
-# 保存结果为 Excel 文件
-output_file = "../../output/excel/每年每种平台变化率中位数.xlsx"
-grouped.to_excel(output_file, index=False)
-print(f"每年每种平台的变化率中位数已保存到 {output_file}")
+grouped = pd.read_excel("../../output/excel/每年每种平台变化率平均值.xlsx")
 
 # 设置中文字体
 font_prop = FontProperties(fname=r"C:\Windows\Fonts\simhei.ttf")
 
 # 创建折线图
-plt.figure(figsize=(12, 6))
-for platform in grouped["平台性质"].unique():
-    platform_data = grouped[grouped["平台性质"] == platform]
-    plt.plot(platform_data["年份"], platform_data["变化率"], marker='o', label=platform)
+plt.figure(figsize=(8, 3))
+
+platform_colors = {
+'信息资讯':  "#4d73b0",  # 浅薰衣草紫 # 冰川蓝
+'网络销售':  "#F1B05F",  # 橘沙金
+'社交娱乐': "#26A020",  # 牛油果绿,  # 柔淡紫
+'生活服务':  "#F47E7E",  # 玫瑰红
+}
+
+# 为不同平台性质设置不同的线条样式
+line_styles = {
+    '信息资讯': '-',      # 实线
+    '网络销售': '--',     # 虚线
+    '社交娱乐': ':',      # 点线
+    '生活服务': '-.'      # 点划线
+}
+
+for platform in grouped['平台性质'].unique():
+        color = platform_colors.get(platform, None)
+        platform_data = grouped[grouped['平台性质'] == platform]
+        plt.plot(platform_data['年份'], platform_data['变化率'], linestyle=line_styles.get(platform,None),label=platform, linewidth=2, color=color)
+
+
+plt.axvline(x=2017, color="#000000", linestyle='--', alpha=0.7)
+plt.axvline(x=2021, color="#000000", linestyle='--', alpha=0.7)
 
 # 图表设置
-plt.title("每年每种平台的变化率中位数", fontproperties=font_prop)
-plt.xlabel("年份", fontproperties=font_prop)
-plt.ylabel("变化率", fontproperties=font_prop)
-plt.xticks(range(2010, 2026))  # 设置横坐标为每一年
+plt.title("平台协议变化率平均数演变趋势（2012-2025）", fontproperties=font_prop,fontsize=10)
+plt.xlabel("年份", fontproperties=font_prop,fontsize=10)
+plt.ylabel("变化率", fontproperties=font_prop,fontsize=10)
+plt.xticks(range(2012, 2026))  # 设置横坐标为每一年
 plt.legend(prop=font_prop)
-plt.grid(True)
+plt.grid(True, linestyle='--', alpha=0.7)
 
 # 保存折线图
-output_image = "../../output/img/每年每种平台变化率中位数.png"
-plt.savefig(output_image)
-print(f"折线图已保存到 {output_image}")
+output_image = "../../output/img/平台协议变化率平均数演变趋势（2012-2025）.png"
+plt.savefig(output_image, dpi=300)
+print(f"带断点分析的折线图已保存到 {output_image}")
 
 # 显示图表
 plt.show()

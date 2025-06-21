@@ -5,7 +5,7 @@ from matplotlib.font_manager import FontProperties
 input_file = "../output/excel/协议数据汇总_可读性分析.xlsx"
 df = pd.read_excel(input_file)
 df["年份"] = pd.to_datetime(df["时间"]).dt.year
-df = df[(df["年份"] >= 2015) & (df["年份"] <= 2025)]
+df = df[(df["年份"] >= 2011) & (df["年份"] <= 2025)]
 # 确保必要的列存在
 required_columns = ['年份', '平台性质', 'r1', 'r2', 'r3']
 for col in required_columns:
@@ -34,22 +34,42 @@ font_prop = FontProperties(fname=r"C:\Windows\Fonts\simhei.ttf")
 
 # 创建折线图
 def plot_metric(metric, title, output_path):
-    plt.figure(figsize=(10, 6))
+
+        # 为每个平台性质分配固定颜色
+    platform_colors = {
+    '信息资讯':  "#4d73b0",  # 浅薰衣草紫 # 冰川蓝
+    '网络销售':  "#F1B05F",  # 橘沙金
+    '社交娱乐': "#26A020",  # 牛油果绿,  # 柔淡紫
+    '生活服务':  "#F47E7E",  # 玫瑰红
+    }
+
+    # 为不同平台性质设置不同的线条样式
+    line_styles = {
+        '信息资讯': '-',      # 实线
+        '网络销售': '--',     # 虚线
+        '社交娱乐': ':',      # 点线
+        '生活服务': '-.'      # 点划线
+    }
+
+    # 绘图
+    plt.figure(figsize=(8, 3))
     for platform in grouped['平台性质'].unique():
+        color = platform_colors.get(platform, None)
         platform_data = grouped[grouped['平台性质'] == platform]
-        plt.plot(platform_data['年份'], platform_data[metric], marker='o', label=platform)
-    plt.title(title,fontproperties=font_prop)
-    plt.xlabel('年份',fontproperties=font_prop)
-    plt.ylabel(metric,fontproperties=font_prop)
-    plt.xticks(range(2015, 2026))
-    plt.legend(prop=font_prop)
-    plt.grid(True)
+        plt.plot(platform_data['年份'], platform_data[metric], linestyle=line_styles.get(platform,None),label=platform, linewidth=2, color=color)
+    plt.title(title,fontproperties=font_prop,fontsize=10)
+    plt.xlabel('年份',fontproperties=font_prop,fontsize=10)
+    plt.ylabel('可读性',fontproperties=font_prop,fontsize=10)
+    plt.xticks(range(2011, 2026))
+    plt.legend(prop=font_prop,framealpha=0.7)
+    plt.grid(True, linestyle='--', alpha=0.7)
+    plt.tight_layout()
     plt.savefig(output_path)
-    plt.close()
+    plt.show()
+    
 
 # 绘制 r1, r2, r3 的折线图
-plot_metric('r1', '每年每种平台性质的 r1 平均值', '../output/img/r1_avg_plot.png')
-plot_metric('r2', '每年每种平台性质的 r2 平均值', '../output/img/r2_avg_plot.png')
-plot_metric('r3', '每年每种平台性质的 r3 平均值', '../output/img/r3_avg_plot.png')
+plot_metric('r3', '平台协议可读性平均数演变趋势（2011-2025）', '../output/img/r3_avg_plot.png')
+
 
 print("折线图已生成并保存到 ../output/img/")

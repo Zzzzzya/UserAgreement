@@ -12,7 +12,7 @@ df = pd.read_excel("../output/excel/协议数据汇总_清洗后.xlsx")
 df["年份"] = pd.to_datetime(df["时间"]).dt.year
 
 # 3️⃣ 筛选合理年份区间（2015-2025）
-df = df[(df["年份"] >= 2015) & (df["年份"] <= 2025)]
+df = df[(df["年份"] >= 2011) & (df["年份"] <= 2025)]
 
 # 平台名称列表
 platform_terms = [
@@ -24,7 +24,7 @@ platform_terms = [
 ]
 
 # 年份范围
-years_range = list(range(2015, 2026))  # 2015-2025
+years_range = list(range(2011, 2026))  # 2015-2025
 
 print(f"开始处理{len(platform_terms)}个平台的数据...")
 
@@ -125,11 +125,23 @@ median_word_count = median_word_count.fillna(0)
 # 设置中文字体
 font_prop = FontProperties(fname=r"C:\Windows\Fonts\simhei.ttf")
 
+# 为每个平台性质分配固定颜色
+platform_colors = {
+  '信息资讯':  "#94D2BD",  # 冰川蓝
+  '网络销售':  "#F1B05F",  # 橘沙金
+  '社交娱乐': "#C9C4DE",  # 柔淡紫
+  '生活服务':  "#F47E7E",  # 玫瑰红
+}
+
+
 # 绘图
 plt.figure(figsize=(14, 7))
 for category in median_word_count.columns:
     if category != "未知":  # 排除"未知"类型
-        plt.plot(median_word_count.index, median_word_count[category], marker='o', linewidth=2, label=category)
+        # 使用指定颜色绘制折线，如果没有指定则使用默认颜色
+        color = platform_colors.get(category, None)
+        plt.plot(median_word_count.index, median_word_count[category], 
+                  linewidth=2, label=category, color=color)
 
 # 设置横坐标为每一年
 years = median_word_count.index.tolist()
